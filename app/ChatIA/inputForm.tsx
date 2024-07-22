@@ -1,20 +1,20 @@
 import { Loader2, Plus, Send } from "lucide-react";
-import React, {
-  ChangeEvent,
-  Dispatch,
-  FormEvent,
-  SetStateAction,
-  useState,
-} from "react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 import SelectedImages from "./selectedImages";
 import { ChatRequestOptions } from "ai";
 
+
 type Props = {
-  handleInputChange: ( e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement> ) => void;
-  handleSubmit: ( e: FormEvent<HTMLFormElement>, chatRequestOptions?: ChatRequestOptions | undefined ) => void;
+  handleInputChange: (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
+  ) => void;
+  handleSubmit: (
+    e: FormEvent<HTMLFormElement>,
+    chatRequestOptions?: ChatRequestOptions | undefined
+  ) => void;
   input: string;
   isLoading: boolean;
-  stop: () => void
+  stop: () => void;
 };
 
 const InputForm = ({
@@ -22,27 +22,26 @@ const InputForm = ({
   handleSubmit,
   input,
   isLoading,
-  stop
+  stop,
 }: Props) => {
   const [images, setImages] = useState<string[]>([]);
-  const handleImageSelection = async (event: ChangeEvent<HTMLInputElement>) => {
+
+  const handleImageSelection = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
     const files = event.target.files;
     if (!files) return;
     const imagePromises = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      // Process the file
       const reader = new FileReader();
 
       imagePromises.push(
         new Promise<string>((resolve, reject) => {
-          // set onload on reader
           reader.onload = (e) => {
             const base64String = e.target?.result?.toString();
-            // const base64String = e.target?.result?.toString().split(",")[1];
             resolve(base64String as string);
           };
-          // set onerror on reader
           reader.onerror = (error) => reject(error);
           reader.readAsDataURL(file);
         })
@@ -50,21 +49,16 @@ const InputForm = ({
     }
 
     try {
-      const base64Strings = await Promise.all(imagePromises); // Wait for all conversions
-      // setImages(base64Strings as string[]);
+      const base64Strings = await Promise.all(imagePromises);
       setImages((prevImages: string[]) => {
-        // Explicitly type the result as a string array
-        const updatedImages: string[] = [
-          ...prevImages,
-          ...(base64Strings as string[]),
-        ];
-        // const updatedImages: string[] = base64Strings as string[];
+        const updatedImages: string[] = [...prevImages, ...(base64Strings as string[])];
         return updatedImages;
       });
     } catch (error) {
       console.error("Error reading image:", error);
     }
   };
+
   return (
     <form
       onSubmit={(event) => {
@@ -75,14 +69,21 @@ const InputForm = ({
           },
         });
       }}
-      className="w-full flex flex-row gap-2 items-center h-full mt-5"
+      className="w-full flex flex-col gap-2 md:flex-row items-stretch md:items-center mt-5"
     >
-      <div className="border flex flex-row relative">
+      <div className="relative flex items-center w-full">
+        <input
+          type="text"
+          placeholder={isLoading ? "Criando sua Resposta ..." : "Faça sua Pergunta ..."}
+          value={input}
+          disabled={isLoading}
+          onChange={handleInputChange}
+          className="border-b border-gray-300 outline-none flex-1 py-2 pr-3 text-[#111827] placeholder:text-[#233150] focus:placeholder-transparent disabled:bg-transparent"
+        />
         <Plus
           onClick={() => document.getElementById("fileInput")?.click()} // Click event handler
-          className="cursor-pointer p-3 h-10 w-10 text-black"
+          className="absolute right-0 mr-2 cursor-pointer p-3 h-10 w-10 text-black"
         />
-        <SelectedImages images={images} setImages={setImages} />
       </div>
       <input
         className="hidden"
@@ -92,17 +93,9 @@ const InputForm = ({
         multiple
         onChange={handleImageSelection}
       />
-      <input
-        type="text"
-        placeholder={isLoading ? "Criando sua Resposta ..." : " Faça sua Pergunta ... "}
-        value={input}
-        disabled={isLoading}
-        onChange={handleInputChange}
-        className="border-b border-gray-300 outline-none w-full py-2 text-[#111827] placeholder:text-[#233150] text-right focus:placeholder-transparent disabled:bg-transparent"
-      />
       <button
         type="submit"
-        className="rounded-full shadow-md border flex flex-row "
+        className="rounded-full shadow-md border flex items-center justify-center mt-2 md:mt-0"
       >
         {isLoading ? (
           <Loader2
@@ -110,7 +103,7 @@ const InputForm = ({
             className="p-3 h-10 w-10 stroke-stone-800 animate-spin"
           />
         ) : (
-          <Send className="p-3 h-10 w-10 stroke-stone-500" />
+          <Send className=" p-3 h-10 w-10 stroke-stone-900" />
         )}
       </button>
     </form>

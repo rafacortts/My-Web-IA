@@ -1,7 +1,7 @@
 import { UserProfile } from '@clerk/nextjs';
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react'; // Importando o ícone de seta para a esquerda
+import { ArrowLeft } from 'lucide-react'; 
 
 function UserProfilePage() {
   return (
